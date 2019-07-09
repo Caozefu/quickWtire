@@ -7,14 +7,11 @@
                      background-color="#545c64"
                      text-color="#fff"
                      active-text-color="#ffd04b"
+                     @select="changeMenu"
                      router>
-                <el-menu-item index="/">
-                    <i class="el-icon-menu"></i>
-                    <span slot="title">收支记录</span>
-                </el-menu-item>
-                <el-menu-item index="/table">
-                    <i class="el-icon-setting"></i>
-                    <span slot="title">导航四</span>
+                <el-menu-item v-for="(item, index) in menuList" :key="index" :index="item.path">
+                    <i :class="item.icon"></i>
+                    <span slot="title">{{ item.title }}</span>
                 </el-menu-item>
             </el-menu>
         </div>
@@ -23,7 +20,7 @@
                 <el-button type="text" @click="fold">
                     <i :class="[isCollapse ? 'el-icon-s-fold' : 'el-icon-s-unfold']"></i>
                 </el-button>
-                收支记录
+                {{ navTitle }}
             </div>
             <div class="content">
                 <router-view/>
@@ -38,12 +35,29 @@
     export default {
         data() {
             return {
-                isCollapse: false
+                isCollapse: false,
+                navTitle: '收支记录',
+                menuList: [{
+                    title: '收支记录',
+                    path: '/',
+                    icon: 'el-icon-menu'
+                }, {
+                    title: '统计表',
+                    path: '/table',
+                    icon: 'el-icon-s-data'
+                }]
             }
         },
         methods: {
             fold() {
                 this.isCollapse = !this.isCollapse;
+            },
+            changeMenu(index) {
+                this.menuList.forEach(item => {
+                    if (item.path === index) {
+                        this.navTitle = item.title;
+                    }
+                })
             }
         }
     }

@@ -1,0 +1,159 @@
+<template>
+    <div class="table" style="text-align: left">
+        <el-form :inline="true" :model="formInline" class="demo-form-inline">
+            <el-form-item label="日期范围">
+                <el-date-picker
+                        v-model="formInline.date"
+                        type="daterange"
+                        align="right"
+                        unlink-panels
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :picker-options="pickerOptions">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="排序方式">
+                <el-select v-model="formInline.sort" clearable placeholder="默认">
+                    <el-option label="收入最高" value="inCount"></el-option>
+                    <el-option label="支出最高" value="outCount"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="search">查询</el-button>
+            </el-form-item>
+        </el-form>
+        <el-card class="box-card">
+            <el-table
+                    :data="tableData"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        label="日期"
+                        width="200">
+                    <template slot-scope="scope">
+                        {{ scope.row.date.substring(0, 10) }}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="收入总额">
+                    <template slot-scope="scope">
+                        <span style="line-height: 32px">{{ scope.row.inCount }}</span>
+                        <el-button type="text"
+                                   size="small"
+                                   @click="getIncountDetail(scope.row)"
+                                   style="float: right; margin-right: 30px">查看收入明细>></el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="支出总额">
+                    <template slot-scope="scope">
+                        <span style="line-height: 32px">{{ scope.row.outCount }}</span>
+                        <el-button type="text" size="small" style="float: right;">查看支出明细>></el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "table",
+        data() {
+            return {
+                formInline: {
+                    date: '',
+                    sort: ''
+                },
+                tableData: [],
+                pickerOptions: {
+                    shortcuts: [{
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近三个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }]
+                }
+            }
+        },
+        methods: {
+            // 获取存储的数据
+            getStorage() {
+                let data = [];
+                const keys = Object.keys(localStorage);
+                keys.forEach(item => {
+                    if (item.match(/^20\d\d,/)) {
+                        data.push(JSON.parse(localStorage.getItem(item)));
+                    }
+                });
+                this.sortTable(data, 'date', 1);
+                this.tableData = data;
+            },
+            /*
+            * @params data: 待处理数据
+            * @params attr: 待排序属性
+            * @params type: 0： 降序, 1： 升序
+            * */
+            sortTable(data, attr, type) {
+                if (!data) return;
+                data.sort((item1, item2) => {
+                    let date1, date2;
+                    if (attr === 'date') {
+                        date1 = new Date(item1.date).getTime();
+                        date2 = new Date(item2.date).getTime();
+                    } else {
+                        date1 = parseFloat(item1[attr]);
+                        date2 = parseFloat(item2[attr]);
+                    }
+                    if (date1 < date2) {
+                        return type ? -1 : 1
+                    } else {
+                        return type ? 1 : -1
+                    }
+                })
+            },
+            search() {
+                if (!this.formInline.sort) return;
+                if (this.formInline.sort === 'inCount') {
+                    this.sortTable(this.tableData, 'inCount', 0)
+                } else {
+                    this.sortTable(this.tableData, 'outCount', 0)
+                }
+            },
+            getIncountDetail(index) {
+                console.log(index);
+            }
+        },
+        mounted() {
+            this.getStorage();
+        }
+    }
+</script>
+
+<style lang="less" scoped>
+    .table {
+        .el-form-item {
+            margin-right: 30px;
+        }
+    }
+</style>

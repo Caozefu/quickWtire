@@ -96,7 +96,8 @@
         },
         computed: {
             result() {
-                return parseInt(this.form.wx || 0) + parseInt(this.form.alipay || 0) + parseInt(this.form.count || 0) + parseInt(this.form.meituan || 0) + parseInt(this.form.eleme || 0);
+                let res = parseFloat(this.form.wx || 0) + parseFloat(this.form.alipay || 0) + parseFloat(this.form.count || 0) + parseFloat(this.form.meituan || 0) + parseFloat(this.form.eleme || 0);
+                return res.toFixed(2);
             }
         },
         watch: {
@@ -117,7 +118,8 @@
                     'date': this.date,
                     'inCountList': this.form,
                     'inCount': this.result,
-                    'outCountList': this.out
+                    'outCountList': this.out,
+                    'outCount': this.outResult()
                 };
                 try {
                     let res = JSON.stringify(json);
@@ -168,9 +170,9 @@
             outResult() {
                 let count = 0;
                 this.out.forEach(val => {
-                    count += parseInt(val.outCount || 0);
+                    count += parseFloat(val.outCount || 0);
                 });
-                return count;
+                return count.toFixed(2);
             }
         },
         mounted() {
