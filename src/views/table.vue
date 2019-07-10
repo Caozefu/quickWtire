@@ -49,11 +49,66 @@
                         label="支出总额">
                     <template slot-scope="scope">
                         <span style="line-height: 32px">{{ scope.row.outCount }}</span>
-                        <el-button type="text" size="small" style="float: right;">查看支出明细>></el-button>
+                        <el-button type="text"
+                                   size="small"
+                                   @click="getOutcountDetail(scope.row)"
+                                   style="float: right;">查看支出明细>></el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </el-card>
+        <el-dialog title="收入详情" width="500px" :visible.sync="incountDetailVisible">
+            <div>
+                <span class="title">日 期</span>
+                <el-divider direction="vertical"></el-divider>
+                <span>{{ getDate }}</span>
+            </div>
+            <el-divider></el-divider>
+            <div class="dialog-content" v-if="currentRow && currentRow.inCountList">
+                <div>
+                    <span class="title">微信收入</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ getMoney('wx') }}</span>
+                </div>
+                <div>
+                    <span class="title">支付宝收入</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ getMoney('alipay') }}</span>
+                </div>
+                <div>
+                    <span class="title">现金收入</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ getMoney('count') }}</span>
+                </div>
+                <div>
+                    <span class="title">饿了么</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ getMoney('eleme') }}</span>
+                </div>
+                <div>
+                    <span class="title">美团</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ getMoney('meituan') }}</span>
+                </div>
+            </div>
+        </el-dialog>
+        <el-dialog title="支出详情" width="500px" :visible.sync="outcountDetailVisible">
+            <div>
+                <span class="title">日 期</span>
+                <el-divider direction="vertical"></el-divider>
+                <span>{{ getDate }}</span>
+            </div>
+            <el-divider></el-divider>
+            <div class="out-dialog-content" v-if="currentRow && currentRow.outCountList">
+                <div v-for="(item, index) in currentRow.outCountList" :key="index">
+                    <span>No.{{index + 1}}</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span class="title">{{ item.name }}</span>
+                    <el-divider direction="vertical"></el-divider>
+                    <span><i>¥</i>{{ formatMoney(item.outCount) }}</span>
+                </div>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -93,6 +148,18 @@
                             picker.$emit('pick', [start, end]);
                         }
                     }]
+                },
+                incountDetailVisible: false,
+                outcountDetailVisible: false,
+                currentRow: {}
+            }
+        },
+        computed: {
+            getDate() {
+                if (this.currentRow && this.currentRow.date) {
+                    return this.currentRow.date.substring(0, 10);
+                } else {
+                    return ''
                 }
             }
         },
@@ -140,8 +207,28 @@
                     this.sortTable(this.tableData, 'outCount', 0)
                 }
             },
-            getIncountDetail(index) {
-                console.log(index);
+            getIncountDetail(row) {
+                this.currentRow = row;
+                this.incountDetailVisible = true;
+            },
+            getOutcountDetail(row) {
+                this.currentRow = row;
+                this.outcountDetailVisible = true;
+            },
+            getMoney(item) {
+                if (parseFloat(this.currentRow.inCountList[item])) {
+                    return parseFloat(this.currentRow.inCountList[item]).toFixed(2) || '0.00'
+                } else {
+                    return '0.00'
+                }
+            },
+            // 格式化金额
+            formatMoney(value) {
+                if (typeof value === 'number') {
+                    return value.toFixed(2) || '0.00'
+                } else {
+                    return value ? parseFloat(value).toFixed(2) : '0.00'
+                }
             }
         },
         mounted() {
@@ -155,5 +242,32 @@
         .el-form-item {
             margin-right: 30px;
         }
+    }
+    .dialog-content, .out-dialog-content {
+        & > div {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            span:last-child {
+                padding-left: 10px;
+                color: #dd8a22;
+                font-weight: 500;
+                & > i {
+                    font-style: normal;
+                    font-weight: 700;
+                    padding-right: 5px;
+                }
+            }
+        }
+    }
+    .out-dialog-content>div span:last-child {
+        color: #ff3131;
+    }
+    .title {
+        display: inline-block;
+        width: 80px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow-x: scroll;
     }
 </style>
