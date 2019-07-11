@@ -121,14 +121,25 @@
                     'outCountList': this.out,
                     'outCount': this.outResult()
                 };
-                try {
-                    let res = JSON.stringify(json);
-                    let key = this.date.getFullYear() + ',' + (this.date.getMonth() + 1) + ',' + this.date.getDate();
-                    localStorage.setItem(key, res);
-                } catch (e) {
-                    this.$message.error('保存失败!');
-                }
-                this.$message.success('保存成功!');
+                this.$http.post('/api/save', json)
+                    .then(res => {
+                        if (res.data.code === 200) {
+                            this.$message.success('保存成功');
+                        } else {
+                            this.$message.error(res.data.message)
+                        }
+                    })
+                    .catch(() => {
+                        this.$message.error('保存失败，请稍后重试');
+                    })
+                // try {
+                //     let res = JSON.stringify(json);
+                //     let key = this.date.getFullYear() + ',' + (this.date.getMonth() + 1) + ',' + this.date.getDate();
+                //     localStorage.setItem(key, res);
+                // } catch (e) {
+                //     this.$message.error('保存失败!');
+                // }
+                // this.$message.success('保存成功!');
             },
             refreshData() {
                 let s = this.date.getFullYear() + ',' + (this.date.getMonth() + 1) + ',' + this.date.getDate();
