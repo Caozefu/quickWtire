@@ -115,7 +115,7 @@
             },
             save() {
                 let json = {
-                    'date': this.date,
+                    'date': new Date(this.date).getTime(),
                     'inCountList': this.form,
                     'inCount': this.result,
                     'outCountList': this.out,
