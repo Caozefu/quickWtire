@@ -32,7 +32,7 @@
                         label="日期"
                         width="200">
                     <template slot-scope="scope">
-                        {{ scope.row.date.substring(0, 10) }}
+                        {{ formatDate(scope.row.date) }}
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -157,7 +157,7 @@
         computed: {
             getDate() {
                 if (this.currentRow && this.currentRow.date) {
-                    return this.currentRow.date.substring(0, 10);
+                    return this.formatDate(this.currentRow.date);
                 } else {
                     return ''
                 }
@@ -166,15 +166,12 @@
         methods: {
             // 获取存储的数据
             getStorage() {
-                let data = [];
-                const keys = Object.keys(localStorage);
-                keys.forEach(item => {
-                    if (item.match(/^20\d\d,/)) {
-                        data.push(JSON.parse(localStorage.getItem(item)));
-                    }
-                });
-                this.sortTable(data, 'date', 1);
-                this.tableData = data;
+                // let data = [];
+                this.$http.get('/api/getTotalItems?sortType=1').then(res => {
+                    this.tableData = res.data.data;
+                })
+                // this.sortTable(data, 'date', 1);
+                // this.tableData = data;
             },
             /*
             * @params data: 待处理数据
@@ -229,6 +226,14 @@
                 } else {
                     return value ? parseFloat(value).toFixed(2) : '0.00'
                 }
+            },
+            formatDate(timestamp) {
+                const year = new Date(timestamp).getFullYear();
+                let month = new Date(timestamp).getMonth() + 1;
+                month = month >= 10 ? month : '0' + month;
+                let date = new Date(timestamp).getDate();
+                date = date >= 10 ? date : '0' + date;
+                return `${year}-${month}-${date}`;
             }
         },
         mounted() {
