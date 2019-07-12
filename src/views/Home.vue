@@ -142,13 +142,31 @@
                 // this.$message.success('保存成功!');
             },
             refreshData() {
-                let s = this.date.getFullYear() + ',' + (this.date.getMonth() + 1) + ',' + this.date.getDate();
-                if (localStorage.getItem(s)) {
-                    this.form = JSON.parse(localStorage.getItem(s)).inCountList;
-                    this.out = JSON.parse(localStorage.getItem(s)).outCountList;
-                } else {
-                    this.resetForm();
-                }
+                const timestamp = new Date(this.date).getTime();
+                this.$http.get('/api/getCurrentInfo?timestamp=' + timestamp).then(res => {
+                    if (res.data.code !== 200) {
+                        this.$message.error(res.data.message);
+                    } else {
+                        const data = res.data.data;
+                        if (data) {
+                            this.form = data.inCountList || {};
+                            this.out = data.outCountList || [
+                                {
+                                    'index': 0,
+                                    'name': '',
+                                    'outCount': ''
+                                }
+                            ];
+                        }
+                    }
+                })
+                // let s = this.date.getFullYear() + ',' + (this.date.getMonth() + 1) + ',' + this.date.getDate();
+                // if (localStorage.getItem(s)) {
+                //     this.form = JSON.parse(localStorage.getItem(s)).inCountList;
+                //     this.out = JSON.parse(localStorage.getItem(s)).outCountList;
+                // } else {
+                //     this.resetForm();
+                // }
             },
             resetForm() {
                 this.form = {
